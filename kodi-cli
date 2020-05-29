@@ -212,6 +212,18 @@ function volume_up {
     echo "Incrementing volume"
     xbmc_req '{ "jsonrpc": "2.0", "method": "Application.SetVolume", "params": { "volume": "increment" }, "id": 1 }'
 }
+function subtitles_off {
+  output=`xbmc_req '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 99}' true`
+  player_id=`echo $output | parse_json "playerid"`
+  echo "Enable subtitles off the player with ID => $player_id"
+  xbmc_req '{"jsonrpc": "2.0", "method": "Player.SetSubtitle", "params": { "playerid": '$player_id', "subtitle": "off", "enable" : false }, "id": 1}'
+}
+function subtitles_on {
+  output=`xbmc_req '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 99}' true`
+  player_id=`echo $output | parse_json "playerid"`
+  echo "Disable subtitles on the player with ID => $player_id"
+  xbmc_req '{"jsonrpc": "2.0", "method": "Player.SetSubtitle", "params": { "playerid": '$player_id', "subtitle": "on", "enable" : false }, "id": 1}'
+}
 
 function volume_down {
     echo "Decrementing volume on"
@@ -219,7 +231,7 @@ function volume_down {
 }
 
 function handle_volume {
-    echo "Press up/down for volume adjustment (q to quit): ";
+    echo "Press up/down for volume adjustment. s/S to toggle subtitles (q to quit): ";
     while :
     do
         read  -s -n1 key
@@ -232,6 +244,10 @@ function handle_volume {
         elif [[ $key == 'B' ]];then
             printf "\r- Volume decreasing."
             xbmc_req '{ "jsonrpc": "2.0", "method": "Application.SetVolume", "params": { "volume": "decrement" }, "id": 1 }'
+        elif [[ $key = s ]];then
+            subtitles_off
+        elif [[ $key = S ]];then
+            subtitles_on
         fi
     done
 }
